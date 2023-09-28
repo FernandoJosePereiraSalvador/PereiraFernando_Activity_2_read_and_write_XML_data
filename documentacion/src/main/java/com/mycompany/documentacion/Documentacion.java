@@ -9,10 +9,8 @@ package com.mycompany.documentacion;
  *
  * @author Fernando
  */
-package com.ieseljust.ad_23_24.ex7;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -31,14 +29,27 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+
+import java.io.FileNotFoundException;
+
 /**
  *
  * @author samuel
  */
 class fileXML {
+    /**
+     * Abre un archivo XML y devuelve su contenido como un objeto Document.
+     * 
+     * @param name El nombre del archivo XML que se va a abrir.
+     * @return Un objeto doom que representa el contenido del fichero
+     * @throws IOException Si ocurre un error al abrir el archivo
+     * @throws SAXException Si ocurre un error de análisis SAX al procesar el archivo.
+     * @throws ParserConfigurationException Si ocurre un error de configuración del analizador XML.
+     * @throws FileNotFoundException Si el archivo XML especificado no se encuentra.
+     */
 
     public Document OpenXML(String name) throws IOException, SAXException, ParserConfigurationException, FileNotFoundException {
-
+        
         // Create an instance of DocumentBuilderFactory 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
