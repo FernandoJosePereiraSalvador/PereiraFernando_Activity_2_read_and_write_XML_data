@@ -36,109 +36,144 @@ import java.io.FileNotFoundException;
  *
  * @author samuel
  */
+/**
+ * Clase que representa operaciones con archivos XML.
+ */
 class fileXML {
+    
     /**
      * Abre un archivo XML y devuelve su contenido como un objeto Document.
      * 
      * @param name El nombre del archivo XML que se va a abrir.
-     * @return Un objeto doom que representa el contenido del fichero
-     * @throws IOException Si ocurre un error al abrir el archivo
+     * @return Un objeto Document que representa el contenido del archivo.
+     * @throws IOException Si ocurre un error al abrir el archivo.
      * @throws SAXException Si ocurre un error de análisis SAX al procesar el archivo.
      * @throws ParserConfigurationException Si ocurre un error de configuración del analizador XML.
      * @throws FileNotFoundException Si el archivo XML especificado no se encuentra.
      */
-
     public Document OpenXML(String name) throws IOException, SAXException, ParserConfigurationException, FileNotFoundException {
         
-        // Create an instance of DocumentBuilderFactory 
+        // Crea una instancia del analizador de documentos XML.
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document dom = null;
 
         try {
-//            File newfile = new File(name);
+            // Parsea el archivo XML especificado.
             dom = dBuilder.parse(name);
 
         } catch (IOException e) {
-
+            // Manejar la excepción en caso de error de lectura del archivo.
         }
         return dom;
     }
 
+    /**
+     * Imprime los módulos contenidos en el elemento raíz del documento XML.
+     * 
+     * @param root El elemento raíz del documento XML.
+     */
     public void printModules(Element root) {
         NodeList modules = root.getElementsByTagName("module");
         for (int i = 0; i < modules.getLength(); i++) {
             Element e = (Element) modules.item(i);
-//            System.out.println(e.getNodeName() + " " + (i + 1));
 
-            System.out.println("Nom: " + e.getElementsByTagName("name").item(0).getFirstChild().getNodeValue());
-            System.out.println("Hores: " + e.getElementsByTagName("hours").item(0).getFirstChild().getNodeValue());
-//            System.out.println("Qualificació: " + e.getElementsByTagName("qualificacio").item(0).getFirstChild().getNodeValue());
-            System.out.println("Time: " + e.getElementsByTagName("time").item(0).getFirstChild().getNodeValue());
+            // Imprime información sobre cada módulo.
+            System.out.println("Nombre: " + e.getElementsByTagName("name").item(0).getFirstChild().getNodeValue());
+            System.out.println("Horas: " + e.getElementsByTagName("hours").item(0).getFirstChild().getNodeValue());
+            System.out.println("Tiempo: " + e.getElementsByTagName("time").item(0).getFirstChild().getNodeValue());
         }
     }
 
+    /**
+     * Escribe un nuevo módulo en un archivo XML.
+     * 
+     * @param file El archivo XML en el que se va a escribir el módulo.
+     * @throws SAXException Si ocurre un error de análisis SAX.
+     * @throws ParserConfigurationException Si ocurre un error de configuración del analizador XML.
+     * @throws TransformerConfigurationException Si ocurre un error de configuración del transformador XML.
+     * @throws FileNotFoundException Si el archivo XML especificado no se encuentra.
+     * @throws TransformerException Si ocurre un error durante la transformación XML.
+     */
     public void writeModules(File file) throws SAXException, ParserConfigurationException,
             TransformerConfigurationException, FileNotFoundException, TransformerException {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
-        // root elements
+        // Crear un nuevo documento XML.
         Document doc = dBuilder.newDocument();
         try {
-
+            // Crear elementos.
             Element rootElement = doc.createElement("course");
             doc.appendChild(rootElement);
 
-            Element module = doc.createElement("module");
+            Element new_module = crearModulo(doc);
 
-            Element name = doc.createElement("name");
-            Element hours = doc.createElement("hours");
-            Element currentTime = doc.createElement("time");
-
-            name.appendChild(doc.createTextNode("Accés a dades"));
-            hours.appendChild(doc.createTextNode(Integer.toString(8)));
-
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-            currentTime.appendChild(doc.createTextNode(now.toString()));
-
-            module.appendChild(name);
-            module.appendChild(hours);
-            module.appendChild(currentTime);
-
-            rootElement.appendChild(module);
+            rootElement.appendChild(new_module);
         } catch (Exception e) {
             System.out.println(e);
         }
 
+        // Realizar la transformación y escribir el documento en el archivo especificado.
         Transformer trans = TransformerFactory.newInstance().newTransformer();
         DOMSource source = new DOMSource(doc);
         StreamResult result = new StreamResult(new FileOutputStream(file));
         trans.transform(source, result);
-
     }
+    
+    /**
+     * Crea un nuevo modulo
+     * 
+     * @param doc El documento XML
+     * @return Un nuevo modulo
+     */
+    public static Element crearModulo(Document doc){
+        
+        Element module = doc.createElement("module");
+        Element name = doc.createElement("name");
+        Element hours = doc.createElement("hours");
+        Element currentTime = doc.createElement("time");
+        Element student = doc.createElement("stu");
+            
+        // Configurar valores para el nuevo módulo.
+        name.appendChild(doc.createTextNode("Acceso a datos"));
+        hours.appendChild(doc.createTextNode(Integer.toString(8)));
 
+        LocalDateTime now = LocalDateTime.now();
+        currentTime.appendChild(doc.createTextNode(now.toString()));
+
+        // Agregar los elementos.
+        module.appendChild(name);
+        module.appendChild(hours);
+        module.appendChild(currentTime);
+        
+        return module;
+    }
 }
 
+
+
+/**
+ * Clase principal que ejecuta el programa
+ */
 public class Documentacion {
 
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, FileNotFoundException, TransformerException {
         fileXML dom = new fileXML();
         
+        // Ejecutar si es read.
         if (args[0].equalsIgnoreCase("read")) {
             Document doc = dom.OpenXML(args[1]);
             dom.printModules(doc.getDocumentElement());
         }
-        if (args[0].equalsIgnoreCase("write")) {
+        // Ejecutar si es write
+        else if (args[0].equalsIgnoreCase("write")) {
             File file = new File(args[1]);
-            if(!file.exists()) {
+            if (!file.exists()) {
                 file.createNewFile();
             }
-//            Document doc = dom.OpenXML(args[1]);
             dom.writeModules(file);
         }
     }
-
 }
