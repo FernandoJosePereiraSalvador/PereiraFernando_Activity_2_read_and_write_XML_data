@@ -31,6 +31,7 @@ import org.xml.sax.SAXException;
 
 
 import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 /**
  *
@@ -134,12 +135,13 @@ class fileXML {
         Element name = doc.createElement("name");
         Element hours = doc.createElement("hours");
         Element currentTime = doc.createElement("time");
-        Element student = doc.createElement("stu");
+        Element student = doc.createElement("student");
             
         // Configurar valores para el nuevo módulo.
         name.appendChild(doc.createTextNode("Acceso a datos"));
         hours.appendChild(doc.createTextNode(Integer.toString(8)));
-
+        student.appendChild(doc.createTextNode("Fernando"));
+        
         LocalDateTime now = LocalDateTime.now();
         currentTime.appendChild(doc.createTextNode(now.toString()));
 
@@ -147,17 +149,41 @@ class fileXML {
         module.appendChild(name);
         module.appendChild(hours);
         module.appendChild(currentTime);
+        module.appendChild(student);
         
         return module;
     }
+    
+    public void findModule(String moduleName, Document doc) {
+        NodeList modules = doc.getElementsByTagName("module");
+        for (int i = 0; i < modules.getLength(); i++) {
+        Element module = (Element) modules.item(i);
+        String name = module.getElementsByTagName("name").item(0).getTextContent();
+
+        if (name.equalsIgnoreCase(moduleName)) {
+                // Se encontró el módulo, muestra su información.
+            System.out.println("Nombre: " + name);
+            System.out.println("Horas: " + module.getElementsByTagName("hours").item(0).getTextContent());
+            System.out.println("Tiempo: " + module.getElementsByTagName("time").item(0).getTextContent());
+            System.out.println("Estudiante: " + module.getElementsByTagName("student").item(0).getTextContent());
+            return; // Termina la búsqueda.
+            }
+        }
+    }
+    
+    public static String preguntarBuscar() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese el nombre del módulo a buscar: ");
+        String moduleName = scanner.nextLine();
+        scanner.close(); // Cerrar el objeto Scanner.
+        return moduleName;
+    }       
 }
-
-
 
 /**
  * Clase principal que ejecuta el programa
  */
-public class Documentacion {
+public class XMLPrograma {
 
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, FileNotFoundException, TransformerException {
         fileXML dom = new fileXML();
@@ -174,6 +200,12 @@ public class Documentacion {
                 file.createNewFile();
             }
             dom.writeModules(file);
+        }
+        
+        else if (args[0].equalsIgnoreCase("search")){
+            String moduleName = fileXML.preguntarBuscar(); 
+            Document doc = dom.OpenXML(args[1]);
+            dom.findModule(moduleName, doc);
         }
     }
 }
